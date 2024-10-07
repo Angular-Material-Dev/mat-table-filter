@@ -16,6 +16,8 @@ import { ExampleHttpDatabase } from './database';
 import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { MatTextFilterDirective } from './mat-text-filter.directive';
 
 @Component({
   selector: 'app-table',
@@ -30,6 +32,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule,
     DatePipe,
     MatProgressSpinnerModule,
+    MatCardModule,
+    MatTextFilterDirective,
   ],
 })
 export class TableComponent implements AfterViewInit {
@@ -38,6 +42,7 @@ export class TableComponent implements AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatTextFilterDirective) textFilter!: MatTextFilterDirective;
   @ViewChild(MatTable) table!: MatTable<TableItem>;
   dataSource: TableDataSource;
   resultsLength = signal(0);
@@ -54,6 +59,7 @@ export class TableComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
+    this.dataSource.textFilter = this.textFilter.matTextFilter;
     this.dataSource.database = this.database;
 
     this.table.dataSource = this.dataSource;

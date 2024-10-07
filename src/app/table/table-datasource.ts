@@ -5,6 +5,7 @@ import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of as observableOf, merge } from 'rxjs';
 import { GithubIssue, ExampleHttpDatabase } from './database';
 import { signal } from '@angular/core';
+import { MatTextFilter } from './mat-text-filter.directive';
 
 // TODO: Replace this with your own data model type
 export interface TableItem extends GithubIssue {}
@@ -19,6 +20,7 @@ export class TableDataSource extends DataSource<TableItem> {
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
   database: ExampleHttpDatabase | undefined;
+  textFilter: MatTextFilter | undefined;
   resultsLength = signal(0);
   isLoadingResults = signal(true);
   isRateLimitReached = signal(false);
@@ -32,11 +34,14 @@ export class TableDataSource extends DataSource<TableItem> {
    * @returns A stream of the items to be rendered.
    */
   connect(): Observable<TableItem[]> {
-    console.log('connect', this.paginator, this.sort, this.database);
-    if (this.paginator && this.sort && this.database) {
+    if (this.paginator && this.sort && this.database && this.textFilter) {
       // Combine everything that affects the rendered data into one update
       // stream for the data-table to consume.
-      return merge(this.paginator.page, this.sort.sortChange).pipe(
+      return merge(
+        this.paginator.page,
+        this.sort.sortChange,
+        this.textFilter.textFilterChange
+      ).pipe(
         startWith({}),
         switchMap(() => {
           this.isLoadingResults.set(true);
@@ -44,7 +49,8 @@ export class TableDataSource extends DataSource<TableItem> {
             this.sort!.active,
             this.sort!.direction,
             this.paginator!.pageIndex,
-            this.paginator!.pageSize
+            this.paginator!.pageSize,
+            this.textFilter!.term
           ).pipe(
             catchError(() => observableOf({ items: [], total_count: 0 })),
             map((data) => {
