@@ -17,7 +17,7 @@ import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
-import { MatTextFilterDirective } from './mat-text-filter.directive';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-table',
@@ -33,7 +33,7 @@ import { MatTextFilterDirective } from './mat-text-filter.directive';
     DatePipe,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatTextFilterDirective,
+    ReactiveFormsModule,
   ],
 })
 export class TableComponent implements AfterViewInit {
@@ -42,12 +42,15 @@ export class TableComponent implements AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatTextFilterDirective) textFilter!: MatTextFilterDirective;
   @ViewChild(MatTable) table!: MatTable<TableItem>;
   dataSource: TableDataSource;
-  resultsLength = signal(0);
-  isLoadingResults = signal(false);
-  isRateLimitReached = signal(false);
+
+  formGroup = new FormGroup(
+    {
+      textFilter: new FormControl(''),
+    },
+    { updateOn: 'submit' }
+  );
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns: string[] = ['created', 'state', 'number', 'title'];
@@ -59,12 +62,9 @@ export class TableComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
-    this.dataSource.textFilter = this.textFilter.matTextFilter;
+    this.dataSource.textFilter = this.formGroup.controls.textFilter;
     this.dataSource.database = this.database;
 
     this.table.dataSource = this.dataSource;
-    this.resultsLength = this.dataSource.resultsLength;
-    this.isLoadingResults = this.dataSource.isLoadingResults;
-    this.isRateLimitReached = this.dataSource.isRateLimitReached;
   }
 }

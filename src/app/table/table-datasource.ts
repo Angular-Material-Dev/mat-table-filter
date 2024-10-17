@@ -5,7 +5,7 @@ import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of as observableOf, merge } from 'rxjs';
 import { GithubIssue, ExampleHttpDatabase } from './database';
 import { signal } from '@angular/core';
-import { MatTextFilter } from './mat-text-filter.directive';
+import { AbstractControl, FormControl } from '@angular/forms';
 
 // TODO: Replace this with your own data model type
 export interface TableItem extends GithubIssue {}
@@ -20,7 +20,7 @@ export class TableDataSource extends DataSource<TableItem> {
   paginator: MatPaginator | undefined;
   sort: MatSort | undefined;
   database: ExampleHttpDatabase | undefined;
-  textFilter: MatTextFilter | undefined;
+  textFilter: FormControl<string | null> | undefined;
   resultsLength = signal(0);
   isLoadingResults = signal(true);
   isRateLimitReached = signal(false);
@@ -40,7 +40,7 @@ export class TableDataSource extends DataSource<TableItem> {
       return merge(
         this.paginator.page,
         this.sort.sortChange,
-        this.textFilter.textFilterChange
+        this.textFilter.valueChanges
       ).pipe(
         startWith({}),
         switchMap(() => {
@@ -50,7 +50,7 @@ export class TableDataSource extends DataSource<TableItem> {
             this.sort!.direction,
             this.paginator!.pageIndex,
             this.paginator!.pageSize,
-            this.textFilter!.term
+            this.textFilter!.value ?? ''
           ).pipe(
             catchError(() => observableOf({ items: [], total_count: 0 })),
             map((data) => {

@@ -1,12 +1,12 @@
 <mat-card>
   <mat-card-content>
   <div class="example-container">
-    @if (isLoadingResults() || isRateLimitReached()) {
+    @if (dataSource.isLoadingResults() || dataSource.isRateLimitReached()) {
       <div class="example-loading-shade">
-        @if (isLoadingResults()) {
+        @if (dataSource.isLoadingResults()) {
           <mat-spinner></mat-spinner>
         }
-        @if (isRateLimitReached()) {
+        @if (dataSource.isRateLimitReached()) {
           <div class="example-rate-limit-reached">
             GitHub's API rate limit has been reached. It will be reset in one minute.
           </div>
@@ -15,9 +15,11 @@
     }
   
     <div class="example-table-container">
-      <mat-form-field class="w-100">
-        <input matTextFilter matInput placeholder="Filter">
-      </mat-form-field>
+      <form [formGroup]="formGroup">
+        <mat-form-field class="w-100">
+          <input formControlName="textFilter" matInput placeholder="Filter">
+        </mat-form-field>
+      </form>
       <table mat-table class="example-table"
              matSort matSortActive="created" matSortDisableClear matSortDirection="desc">
         <!-- Number Column -->
@@ -51,7 +53,7 @@
       </table>
     </div>
   
-    <mat-paginator [length]="resultsLength()" [pageSize]="30" aria-label="Select page of GitHub search results"></mat-paginator>
+    <mat-paginator [length]="dataSource.resultsLength()" [pageSize]="30" aria-label="Select page of GitHub search results"></mat-paginator>
   </div>
 </mat-card-content>
 </mat-card>
