@@ -1,11 +1,11 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { Observable, of as observableOf, merge } from 'rxjs';
 import { GithubIssue, ExampleHttpDatabase } from './database';
 import { signal } from '@angular/core';
-import { AbstractControl, FormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 
 // TODO: Replace this with your own data model type
 export interface TableItem extends GithubIssue {}
@@ -40,7 +40,7 @@ export class TableDataSource extends DataSource<TableItem> {
       return merge(
         this.paginator.page,
         this.sort.sortChange,
-        this.textFilter.valueChanges
+        this.textFilter.valueChanges.pipe(debounceTime(200))
       ).pipe(
         startWith({}),
         switchMap(() => {
